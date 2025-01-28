@@ -27,4 +27,12 @@ class UserController extends Controller
             'users' => $users
         ], 200);
     }
+
+    public function show(User $user): JsonResponse{
+        //Retornar os dados em formato de objeto e status 200
+        return response()->json([
+            'status' => true,
+            'users' => $user
+        ], 200);
+    }
 }
