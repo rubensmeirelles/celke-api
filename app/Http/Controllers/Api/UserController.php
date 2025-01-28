@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserPasswordRequest;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\TryCatch;
 
 class UserController extends Controller
 {
@@ -75,7 +77,10 @@ class UserController extends Controller
         }
     }
 
-    public function update(UserRequest $request, User $user): JsonResponse{
+    public function update(UserRequest $request, User $user): JsonResponse
+    {
+        // Iniciar a transação
+        DB::beginTransaction();
 
         try{
 
@@ -93,7 +98,7 @@ class UserController extends Controller
                 'users' => $user,
                 'message' => 'Usuário editado com sucesso!'
             ], 200);
-            
+
         } catch(Exception $e) {
             //Operação não realizada!
             DB::rollBack();
@@ -101,6 +106,60 @@ class UserController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Usuário não editado!'
+            ], 400);
+        }
+    }
+
+    public function destroy(User $user): JsonResponse
+    {
+        try{
+
+            //Excluir o registro
+            $user->delete();
+
+            //Retornar os dados em formato de objeto e status 201
+            return response()->json([
+                'status' => true,
+                'users' => $user,
+                'message' => 'Usuário excluído com sucesso!'
+            ], 200);
+
+        } catch(Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Usuário não excluído!'
+            ], 400);
+        }
+    }
+
+    public function updatePassword(UserPasswordRequest $request, User $user): JsonResponse
+    {
+
+        // Iniciar a transação
+        DB::beginTransaction();
+        try{
+
+                $user->update([
+                    'password' => $request->password,
+                ]);
+
+                //Operação concluída com sucesso!
+                DB::commit();
+
+            //Retornar os dados em formato de objeto e status 201
+            return response()->json([
+                'status' => true,
+                'users' => $user,
+                'message' => 'Senha editada com sucesso!'
+            ], 200);
+
+        } catch(Exception $e) {
+            //Operação não realizada!
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Senha não editada!'
             ], 400);
         }
     }
