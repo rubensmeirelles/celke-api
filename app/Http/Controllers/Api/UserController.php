@@ -43,7 +43,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function store(UserRequest $request)
+    public function store(UserRequest $request): JsonResponse
     {
 
         DB::beginTransaction();
@@ -71,6 +71,36 @@ class UserController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Usuário não cadastrado!'
+            ], 400);
+        }
+    }
+
+    public function update(UserRequest $request, User $user): JsonResponse{
+
+        try{
+
+                $user->update([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                ]);
+
+                //Operação concluída com sucesso!
+                DB::commit();
+
+            //Retornar os dados em formato de objeto e status 201
+            return response()->json([
+                'status' => true,
+                'users' => $user,
+                'message' => 'Usuário editado com sucesso!'
+            ], 200);
+            
+        } catch(Exception $e) {
+            //Operação não realizada!
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Usuário não editado!'
             ], 400);
         }
     }
