@@ -16,7 +16,10 @@ class UserController extends Controller
      */
     public function index(): JsonResponse {
         //Recuperar os usuários do banco de dados
-        $users = User::get();
+        //$users = User::get();
+
+        //Recuperar registros com paginação
+        $users = User::paginate(2);
 
         //Retornar os dados em formato de objeto e status 200
         return response()->json([
