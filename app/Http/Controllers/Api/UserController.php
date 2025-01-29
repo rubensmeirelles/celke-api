@@ -26,7 +26,7 @@ class UserController extends Controller
         //$users = User::get();
 
         //Recuperar registros com paginação
-        $users = User::paginate(40);
+        $users = User::orderBy('id', 'DESC')->paginate(40);
 
         //Retornar os dados em formato de objeto e status 200
         return response()->json([
