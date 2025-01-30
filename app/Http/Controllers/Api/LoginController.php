@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -32,6 +33,39 @@ class LoginController extends Controller
                 'status' => false,
                 'message' => 'Login ou senha inválidos'
             ], 404);
+        }
+
+    }
+
+    public function logout(): JsonResponse{
+
+        try{
+
+            $authUserId = Auth::check() ? Auth::id() : '';
+
+            if(!$authUserId){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Usuário não está logado'
+                ], 400);
+            }
+
+            //Recuperar os dados do usuário logado
+            $user = User::where('id', $authUserId)->first();
+
+            //Excluir o token do usuário
+            $user->tokens()->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Deslogado com sucesso.'
+            ], 200);
+
+        } catch(Exception $e){
+            return response()->json([
+                'status' => false,
+                'message' => 'Não deslogado'
+            ], 400);
         }
 
     }
